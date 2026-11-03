@@ -1,0 +1,58 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "data": {
+    "url": "https://raw.githubusercontent.com/rmcgazo/infovis-assignment2/main/emissions_gva.csv",
+    "format": {"type": "csv"}
+  },
+  "title": {
+    "text": "Economic output vs greenhouse gas emissions by sector",
+    "anchor": "middle",
+    "fontSize": 18
+  },
+  "width": 500,
+  "height": 500,
+
+  "params": [
+  {
+    "name": "year",
+    "value": 2024,
+    "bind": {"input": "range", "min": 2009, "max": 2024, "step": 1, "name": "Year: "}
+  }
+],
+
+  "transform": [
+    {"filter": "datum.Year == year"}
+  ],
+  "mark": {"type": "circle", "size": 120},
+  "encoding": {
+    "x": {
+      "field": "GVA",
+      "type": "quantitative",
+      "scale": {"type": "log", "domain": [300, 300000]},
+      "axis": {
+        "title": "Economic output (GVA, € million, log scale)",
+        "values": [300, 1000, 3000, 10000, 30000, 100000, 300000],
+        "format": ",.0f"
+      }
+    },
+    "y": {
+      "field": "Emissions",
+      "type": "quantitative",
+      "scale": {"type": "log", "domain": [10, 40000]},
+      "axis": {
+        "title": "Emissions (thousand tonnes CO2e, log scale)",
+        "values": [10, 30, 100, 300, 1000, 3000, 10000, 30000],
+        "format": ",.0f"
+      }
+    },
+    "tooltip": [
+      {"field": "Sector", "type": "nominal"},
+      {"field": "Emissions", "type": "quantitative", "format": ",.0f"},
+      {"field": "GVA", "type": "quantitative", "format": ",.0f"},
+      {"field": "Intensity", "type": "quantitative", "format": ",.0f", "title": "Tonnes CO2e per €m"}
+    ]
+  },
+  "config": {
+    "axis": {"titleFontSize": 14, "labelFontSize": 12}
+  }
+}
