@@ -1,0 +1,238 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "data": {
+    "url": "https://raw.githubusercontent.com/rmcgazo/infovis-assignment2/main/emissions_gva.csv",
+    "format": {"type": "csv"}
+  },
+  "title": {
+    "text": "Which sectors of Ireland's economy emit the most for what they produce?",
+    "subtitle": "Drag the slider to change year. Click a sector to highlight it in every chart (shift-click to add more, double-click to clear).",
+    "anchor": "middle",
+    "fontSize": 20,
+    "offset": 20
+  },
+  "params": [
+    {
+      "name": "year",
+      "value": 2024,
+      "bind": {
+        "input": "range",
+        "min": 2009,
+        "max": 2024,
+        "step": 1,
+        "name": "Year: "
+      }
+    },
+    {
+      "name": "pick",
+      "select": {"type": "point", "fields": ["Sector"]},
+      "views": ["scatter", "bar"]
+    }
+  ],
+  "transform": [
+    {
+      "calculate": "datum.Section == 'A' ? 'Agriculture' : datum.Section == 'H' ? 'Transport' : indexof(['B','C','D','E','F'], datum.Section) >= 0 ? 'Industry and energy' : 'Services'",
+      "as": "Group"
+    }
+  ],
+  "vconcat": [
+    {
+      "hconcat": [
+        {
+          "name": "scatter",
+          "title": "Economic output vs emissions",
+          "width": 450,
+          "height": 450,
+          "transform": [{"filter": "datum.Year == year"}],
+          "mark": {"type": "circle", "size": 120, "opacity": 1},
+          "encoding": {
+            "x": {
+              "field": "GVA",
+              "type": "quantitative",
+              "scale": {"type": "log", "domain": [300, 300000]},
+              "axis": {
+                "title": "Economic output (GVA, € million, log scale)",
+                "values": [300, 1000, 3000, 10000, 30000, 100000, 300000],
+                "format": ",.0f"
+              }
+            },
+            "y": {
+              "field": "Emissions",
+              "type": "quantitative",
+              "scale": {"type": "log", "domain": [10, 40000]},
+              "axis": {
+                "title": "Emissions (thousand tonnes CO2e, log scale)",
+                "values": [10, 30, 100, 300, 1000, 3000, 10000, 30000],
+                "format": ",.0f"
+              }
+            },
+            "color": {
+              "field": "Group",
+              "type": "nominal",
+              "scale": {
+                "domain": [
+                  "Agriculture",
+                  "Transport",
+                  "Industry and energy",
+                  "Services"
+                ],
+                "range": ["#009E73", "#E69F00", "#0072B2", "#CC79A7"]
+              }
+            },
+            "opacity": {
+              "condition": {"param": "pick", "value": 1},
+              "value": 0.15
+            },
+            "tooltip": [
+              {"field": "Sector", "type": "nominal"},
+              {"field": "Emissions", "type": "quantitative", "format": ",.0f"},
+              {"field": "GVA", "type": "quantitative", "format": ",.0f"},
+              {
+                "field": "Intensity",
+                "type": "quantitative",
+                "format": ",.0f",
+                "title": "Tonnes CO2e per €m"
+              }
+            ]
+          }
+        },
+        {
+          "name": "bar",
+          "title": "Emissions per €1 million of output",
+          "width": 350,
+          "height": 450,
+          "transform": [{"filter": "datum.Year == year"}],
+          "mark": "bar",
+          "encoding": {
+            "y": {
+              "field": "Sector",
+              "type": "nominal",
+              "sort": "-x",
+              "axis": {"title": null}
+            },
+            "x": {
+              "field": "Intensity",
+              "type": "quantitative",
+              "axis": {"title": "Tonnes CO2e per €1 million of GVA"}
+            },
+            "color": {
+              "field": "Group",
+              "type": "nominal",
+              "scale": {
+                "domain": [
+                  "Agriculture",
+                  "Transport",
+                  "Industry and energy",
+                  "Services"
+                ],
+                "range": ["#009E73", "#E69F00", "#0072B2", "#CC79A7"]
+              }
+            },
+            "opacity": {
+              "condition": {"param": "pick", "value": 1},
+              "value": 0.15
+            },
+            "tooltip": [
+              {"field": "Sector", "type": "nominal"},
+              {
+                "field": "Intensity",
+                "type": "quantitative",
+                "format": ",.0f",
+                "title": "Tonnes CO2e per €m"
+              },
+              {"field": "Emissions", "type": "quantitative", "format": ",.0f"},
+              {"field": "GVA", "type": "quantitative", "format": ",.0f"}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "title": "Emissions over time, 2009 to 2024",
+      "width": 900,
+      "height": 260,
+      "layer": [
+        {
+          "mark": {"type": "line", "strokeWidth": 2.5},
+          "encoding": {
+            "x": {
+              "field": "Year",
+              "type": "quantitative",
+              "scale": {"domain": [2009, 2024], "nice": false},
+              "axis": {
+                "title": null,
+                "format": "d",
+                "values": [
+                  2009,
+                  2010,
+                  2011,
+                  2012,
+                  2013,
+                  2014,
+                  2015,
+                  2016,
+                  2017,
+                  2018,
+                  2019,
+                  2020,
+                  2021,
+                  2022,
+                  2023,
+                  2024
+                ]
+              }
+            },
+            "y": {
+              "field": "Emissions",
+              "type": "quantitative",
+              "scale": {"type": "log", "domain": [10, 40000]},
+              "axis": {
+                "title": "Emissions (kt CO2e, log scale)",
+                "values": [10, 100, 1000, 10000],
+                "format": ",.0f"
+              }
+            },
+            "detail": {"field": "Sector", "type": "nominal"},
+            "color": {
+              "field": "Group",
+              "type": "nominal",
+              "scale": {
+                "domain": [
+                  "Agriculture",
+                  "Transport",
+                  "Industry and energy",
+                  "Services"
+                ],
+                "range": ["#009E73", "#E69F00", "#0072B2", "#CC79A7"]
+              }
+            },
+            "opacity": {
+              "condition": {"param": "pick", "value": 1},
+              "value": 0.12
+            },
+            "tooltip": [
+              {"field": "Sector", "type": "nominal"},
+              {"field": "Year", "type": "quantitative", "format": "d"},
+              {"field": "Emissions", "type": "quantitative", "format": ",.0f"}
+            ]
+          }
+        },
+        {
+          "transform": [{"filter": "datum.Year == year"}],
+          "mark": {"type": "rule", "color": "black", "strokeDash": [4, 4]},
+          "encoding": {"x": {"field": "Year", "type": "quantitative"}}
+        }
+      ]
+    }
+  ],
+  "config": {
+    "axis": {"titleFontSize": 13, "labelFontSize": 12},
+    "title": {"fontSize": 16},
+    "legend": {
+      "orient": "bottom",
+      "direction": "horizontal",
+      "title": null,
+      "labelFontSize": 13
+    }
+  }
+}

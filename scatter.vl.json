@@ -1,0 +1,87 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v6.json",
+  "data": {
+    "url": "https://raw.githubusercontent.com/rmcgazo/infovis-assignment2/main/emissions_gva.csv",
+    "format": {"type": "csv"}
+  },
+  "title": {
+    "text": "Economic output vs greenhouse gas emissions by sector",
+    "anchor": "middle",
+    "fontSize": 18
+  },
+  "width": 500,
+  "height": 500,
+  "params": [
+    {
+      "name": "year",
+      "value": 2024,
+      "bind": {
+        "input": "range",
+        "min": 2009,
+        "max": 2024,
+        "step": 1,
+        "name": "Year: "
+      }
+    }
+  ],
+  "transform": [
+    {"filter": "datum.Year == year"},
+    {
+      "calculate": "datum.Section == 'A' ? 'Agriculture' : datum.Section == 'H' ? 'Transport' : indexof(['B','C','D','E','F'], datum.Section) >= 0 ? 'Industry and energy' : 'Services'",
+      "as": "Group"
+    }
+  ],
+  "mark": {"type": "circle", "size": 120},
+  "encoding": {
+    "x": {
+      "field": "GVA",
+      "type": "quantitative",
+      "scale": {"type": "log", "domain": [300, 300000]},
+      "axis": {
+        "title": "Economic output (GVA, € million, log scale)",
+        "values": [300, 1000, 3000, 10000, 30000, 100000, 300000],
+        "format": ",.0f"
+      }
+    },
+    "y": {
+      "field": "Emissions",
+      "type": "quantitative",
+      "scale": {"type": "log", "domain": [10, 40000]},
+      "axis": {
+        "title": "Emissions (thousand tonnes CO2e, log scale)",
+        "values": [10, 30, 100, 300, 1000, 3000, 10000, 30000],
+        "format": ",.0f"
+      }
+    },
+    "color": {
+      "field": "Group",
+      "type": "nominal",
+      "scale": {
+        "domain": [
+          "Agriculture",
+          "Transport",
+          "Industry and energy",
+          "Services"
+        ],
+        "range": ["#009E73", "#E69F00", "#0072B2", "#CC79A7"]
+      },
+      "legend": {"title": "Sector type"}
+    },
+    "tooltip": [
+      {"field": "Sector", "type": "nominal"},
+      {"field": "Group", "type": "nominal", "title": "Sector type"},
+      {"field": "Emissions", "type": "quantitative", "format": ",.0f"},
+      {"field": "GVA", "type": "quantitative", "format": ",.0f"},
+      {
+        "field": "Intensity",
+        "type": "quantitative",
+        "format": ",.0f",
+        "title": "Tonnes CO2e per €m"
+      }
+    ]
+  },
+  "config": {
+    "axis": {"titleFontSize": 14, "labelFontSize": 12},
+    "legend": {"orient": "top-right", "titleFontSize": 13, "labelFontSize": 12}
+  }
+}
